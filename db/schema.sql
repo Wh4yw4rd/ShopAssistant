@@ -1,0 +1,6 @@
+CREATE TABLE users (
+    id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    name TEXT NOT NULL,
+    password_hash TEXT NOT NULL,
+    created_date DATE DEFAULT NOW()
+);
