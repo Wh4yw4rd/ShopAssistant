@@ -2,7 +2,7 @@ import requests
 import json
 
 from config import sumup_api
-
+from models import Transaction
 
 
 def get_transactions(oldest_date : str = None):
@@ -22,7 +22,7 @@ def get_transactions(oldest_date : str = None):
 
     transactions_json = response.json()["items"]
 
-    transactions = [{key:value for key, value in transaction.items() if key in required_columns} for transaction in transactions_json]
+    transactions = [Transaction(**{key:value for key, value in transaction.items() if key in required_columns}) for transaction in transactions_json]
 
     return transactions
 
@@ -47,17 +47,4 @@ def get_transaction_products(transaction_codes : list[str]):
         print(response.json())
 
     return 
-
-
-
-
-
-# transactions = get_transactions("2024-01-01T00:00:00Z")
-#print(transactions)
-
-#codes = []
-#for transaction in transactions:
-    codes.append(transaction["transaction_code"])
-
-#print(get_transaction_products(codes))
 

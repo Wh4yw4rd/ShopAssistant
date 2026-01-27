@@ -3,7 +3,9 @@ CREATE TABLE users (
     name TEXT NOT NULL,
     password_hash TEXT NOT NULL,
     email TEXT,
-    created_date DATE DEFAULT NOW()
+    admin BOOLEAN DEFAULT FALSE,
+    created_date DATE DEFAULT NOW(),
+    CONSTRAINT unique_name UNIQUE (name)
 );
 
 CREATE TABLE transactions (
@@ -14,4 +16,5 @@ CREATE TABLE transactions (
     amount DECIMAL(8,2) NOT NULL,
     payment_type TEXT NOT NULL,
     status TEXT NOT NULL
+    CONSTRAINT unique_transaction_code UNIQUE (transaction_code)
 );
