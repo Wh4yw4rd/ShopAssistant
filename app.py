@@ -1,10 +1,12 @@
 from fastapi import FastAPI, HTTPException, Response, Cookie
 from datetime import datetime, timedelta
 import secrets
+from contextlib import asynccontextmanager
 
 from models import LoginCredentials, CreateUser, DBUser
 from security import hash, verify
-from db_functions import add_user_to_db, login_user
+from db_functions import initialise_pool, close_pool, add_user_to_db, login_user
+
 
 ### Session Parameters ###
 
@@ -14,9 +16,21 @@ sessions = {}
 
 session_TTL = 86400  # 24 hours (in seconds)
 
+
+### Create Startup/Shutdown Processes ###
+
+@asynccontextmanager
+async def lifespan(app : FastAPI):
+    # On startup
+    initialise_pool()
+    yield
+    # On Shutdown
+    close_pool()
+
+
 ### FastAPI App Initialization ###
 
-app = FastAPI()
+app = FastAPI(lifespan = lifespan)
 
 ### Sample Endpoint ###
 
@@ -60,6 +74,7 @@ def login(response : Response, credentials : LoginCredentials, session_id : str 
     
     # Validate password
     if verify(credentials.password, user_record[1]):
+
         # Save session data to sessions dict (Will move to Redis or database in future)
         new_session = {"name" : user_record[0],
                        "admin" : user_record[2],
@@ -75,45 +90,6 @@ def login(response : Response, credentials : LoginCredentials, session_id : str 
     # Raise error if password does not match
     else:
         raise HTTPException(status_code = 401, detail = "Unauthorised: Incorrect password")
-            
-
-@app.post("/create-user/")
-def create_user(credentials : CreateUser, session_id : str | None = Cookie(default=None)):
-    """
-    Endpoint that allows admin users to create new users and set access level.
-    """
-
-    # Check if user in logged in
-    if session_id is None or session_id not in sessions:
-        raise HTTPException(status_code = 401, detail = "Unauthorized: Please login with an admin user.")
-    
-    # Check if user is admin
-    if sessions[session_id]["admin"] is not True:
-        raise HTTPException(status_code = 401, detail = "Unauthorized: Please login with an admin user.")
-
-    # Create new user
-    # Hash password for secure storage in database
-    hashed_password = hash(credentials.password)
-
-    # Create DBUser model instance for new user
-    user = DBUser(
-        name = credentials.name,
-        password_hash = hashed_password,
-        email = credentials.email)
-    
-    # Add user to database
-    try:
-        add_user_to_db(user)
-    
-    except Exception as e:
-        # Raised error if username already exists
-        if "unique_name" in str(e):
-            raise HTTPException(status_code=409, detail="Username already exists")
-        
-        # Raise error for other database issues
-        raise HTTPException(status_code=500, detail=str(e))
-    
-    return {"message" : "User creation successful"}
 
 
 @app.post("/logout/")
@@ -132,7 +108,50 @@ def logout(response : Response, session_id : str | None = Cookie(default=None)):
     response.delete_cookie(key = "session_id")
 
     return {"message" : "Logout successful"}
+           
 
+@app.post("/create-user/")
+def create_user(credentials : CreateUser, session_id : str | None = Cookie(default=None)):
+    """
+    Endpoint that allows admin users to create new users and set access level.
+    """
+    # Check if user in logged in
+    if session_id is None or session_id not in sessions:
+        raise HTTPException(status_code = 401, detail = "Unauthorized: Please login with an admin user.")
+    
+    # Check if user is admin
+    if sessions[session_id]["admin"] is not True:
+        raise HTTPException(status_code = 401, detail = "Unauthorized: Please login with an admin user.")
+
+    # Create new user
+    # Hash password for secure storage in database
+    hashed_password = hash(credentials.password)
+
+    # Create DBUser model instance for new user
+    user = DBUser(
+        name = credentials.name,
+        password_hash = hashed_password,
+        email = credentials.email,
+        admin = credentials.admin)
+    
+    # Add user to database
+    try:
+        add_user_to_db(user)
+    
+    except Exception as e:
+        # Raised error if username already exists
+        if "unique_name" in str(e):
+            raise HTTPException(status_code=409, detail="Username already exists")
+        
+        # Raise error for other database issues
+        raise HTTPException(status_code=500, detail=str(e))
+    
+    return {"message" : "User creation successful"}
+
+
+@app.post("/delete-user/")
+def delete_user():
+    pass
 
 ### Transaction Data Endpoints ###
 

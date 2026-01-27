@@ -10,6 +10,7 @@ class CreateUser(BaseModel):
     name : str
     password : str
     email : str = None
+    admin : bool = False
 
 class DBUser(BaseModel):
     name : str

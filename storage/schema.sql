@@ -1,3 +1,4 @@
+-- Create users table
 CREATE TABLE users (
     id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     name TEXT NOT NULL,
@@ -8,6 +9,7 @@ CREATE TABLE users (
     CONSTRAINT unique_name UNIQUE (name)
 );
 
+-- Create transactions table
 CREATE TABLE transactions (
     transaction_id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     transaction_code TEXT NOT NULL,
@@ -15,6 +17,6 @@ CREATE TABLE transactions (
     transaction_date TIMESTAMP NOT NULL,
     amount DECIMAL(8,2) NOT NULL,
     payment_type TEXT NOT NULL,
-    status TEXT NOT NULL
+    status TEXT NOT NULL,
     CONSTRAINT unique_transaction_code UNIQUE (transaction_code)
 );
