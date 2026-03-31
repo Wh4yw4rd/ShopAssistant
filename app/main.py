@@ -8,7 +8,6 @@ from app.database.connections import *
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     app.state.pool = initialise_pool()
-    app.state.sessions = {}
     yield 
     app.state.pool.closeall()
 

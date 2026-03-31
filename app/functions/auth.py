@@ -3,6 +3,11 @@ from app.core.security import *
 from app.database.user import *
 from app.sessions.sessions import *
 
+
+def create_session(user_entry: UserEntry):
+    pass
+
+
 def authenticate_credentials(app, user_login: UserLogin, conn):
 
     user_entry = get_user_credentials(user_login.name, conn)

@@ -10,4 +10,3 @@ class Session(BaseModel):
     name: str
     email: str
     admin: bool
-    created_date: datetime = datetime.now()

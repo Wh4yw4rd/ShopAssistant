@@ -1,6 +1,3 @@
-from fastapi import HTTPException
-
-from app.database.connections import get_conn
 from app.models.user_models import *
 
 
