@@ -20,11 +20,11 @@ def get_session(id: int, conn):
         raise ValueError("Invalid Session")
     
     session = SessionDB(
-        "id": session[0],
-        "name": session[1],
-        "email": session[2],
-        "admin": session[3],
-        "created_date": session[4]
+        id=session[0],
+        name=session[1],
+        email=session[2],
+        admin=session[3],
+        created_date=session[4]
     )
 
     return session
