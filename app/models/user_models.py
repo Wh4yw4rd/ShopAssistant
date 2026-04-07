@@ -1,8 +1,13 @@
 from pydantic import BaseModel
-from datetime import datetime
 
-class UserEntry(BaseModel):
-    name : str
-    password_hash : str
-    email : str
+
+class UserLogin(BaseModel):
+    name: str
+    password: str
+
+
+class NewUser(BaseModel):
+    name: str
+    password: str
+    email: str
     admin: bool

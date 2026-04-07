@@ -2,8 +2,8 @@ from pydantic import BaseModel
 from datetime import datetime
 
 class SessionDB(BaseModel):
-    id: int
+    id: str
     name: str
-    email: str
+    email: str | None
     admin: bool
     created_date: datetime

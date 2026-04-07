@@ -1,4 +1,4 @@
-from app.models.user_models import *
+from app.schemas.user_schemas import *
 
 
 def get_user_credentials(name: str, conn):
@@ -22,7 +22,7 @@ def get_user_credentials(name: str, conn):
     if user_data is None:
         raise ValueError("User Not Found")
     
-    user_entry = UserEntry(
+    user_entry = UserDB(
         name = user_data[0],
         password_hash = user_data[1],
         email = user_data[2],
@@ -30,3 +30,20 @@ def get_user_credentials(name: str, conn):
     )
 
     return user_entry
+
+
+def add_user(new_user: UserDB, conn):
+    create_new = """
+                INSERT INTO users (name, password_hash, email, admin)
+                VALUES (%s, %s, %s, %s);
+                """
+    try:
+        with conn.cursor() as cur:
+            cur.execute(create_new, new_user.name, new_user.password_hash, new_user.email, new_user.admin,)
+
+        conn.commit()
+
+    except Exception as e:
+        conn.rollback()
+        raise RuntimeError("Database Error", e)
+

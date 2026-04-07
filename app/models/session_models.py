@@ -8,5 +8,5 @@ class Cookies(BaseModel):
 class Session(BaseModel):
     session_id: str
     name: str
-    email: str
+    email: str | None
     admin: bool
