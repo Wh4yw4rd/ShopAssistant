@@ -39,11 +39,27 @@ def add_user(new_user: UserDB, conn):
                 """
     try:
         with conn.cursor() as cur:
-            cur.execute(create_new, new_user.name, new_user.password_hash, new_user.email, new_user.admin,)
+            cur.execute(create_new, (new_user.name, new_user.password_hash, new_user.email, new_user.admin,))
 
         conn.commit()
 
     except Exception as e:
         conn.rollback()
-        raise RuntimeError("Database Error", e)
+        raise RuntimeError("Database Error")
 
+
+def remove_user(name: str, conn):
+    delete_user = """
+                DELETE FROM TABLE users
+                WHERE name = %s;
+                """
+    
+    try:
+        with conn.cursor() as cur:
+            cur.execute(delete_user, (name,))
+
+        conn.commit()
+
+    except Exception as e:
+        conn.rollback()
+        raise RuntimeError("Database Error")

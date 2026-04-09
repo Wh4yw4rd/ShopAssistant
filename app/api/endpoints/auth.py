@@ -53,4 +53,19 @@ def create_user(new_user: NewUser, conn = Depends(get_conn), session_id: str | N
         return {"message": f"{new_user.name} created!"}
     
 
+@router.post("/delete-user/")
+def delete_user(old_user: UserLogin, conn = Depends(get_conn), session_id: str | None = Cookie(default=None)):
+    session = check_session(str(session_id), conn)
+
+    if session is None:
+        return {"message": "Unable to delete user, please sign in to an admin account."}
+    
+    elif not session.admin:
+        return {"message": f"{session.name} is not an admin, please login to an admin account."}
+    
+    else:
+        delete_user(old_user.name, conn)
+        return {"message": f"{old_user.name} deleted!"}
+    
+
 
