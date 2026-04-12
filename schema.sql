@@ -11,14 +11,16 @@ CREATE TABLE users (
 
 -- Create transactions table
 CREATE TABLE transactions (
-    transaction_id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    transaction_id TEXT NOT NULL,
     transaction_code TEXT NOT NULL,
+    transaction_timestamp TIMESTAMP NOT NULL,
     entry_mode TEXT NOT NULL,
-    transaction_date TIMESTAMP NOT NULL,
-    amount DECIMAL(8,2) NOT NULL,
+    card_type TEXT,
+    amount DECIMAL(8,2),
+    refunded_amount DECIMAL(8,2),
     payment_type TEXT NOT NULL,
-    status TEXT NOT NULL,
-    CONSTRAINT unique_transaction_code UNIQUE (transaction_code)
+    status TEXT NOT NULL
 );
 
 -- Create sessions table
