@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from app.database.connections import get_conn
 from app.externals.sumup import *
 from app.database.transactions import *
@@ -6,7 +6,19 @@ from app.functions.transactions import *
 
 router = APIRouter()
 
-@router.get("/transactions/")
-def temp_transactions(conn = Depends(get_conn)):
-    update_transactions(conn, 1000)
-    return {"message": "Done!"}
+@router.get("/update/")
+def refresh_transactions(conn = Depends(get_conn)):
+    num_added = update_transactions(conn, 1000)
+    return {"message": f"Done! {num_added} transactions added!"}
+
+
+@router.get("/range/{start}-{end}")
+def transaction_from_range(start: str, end: str, conn = Depends(get_conn)):
+    try:
+        start = datetime.strptime(start, "%d%m%Y")
+        end = datetime.strptime(end, "%d%m%Y")
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid Date Formats")
+    
+    data = transaction_range(start, end, conn)
+    return data

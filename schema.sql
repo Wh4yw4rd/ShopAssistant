@@ -20,7 +20,8 @@ CREATE TABLE transactions (
     amount DECIMAL(8,2),
     refunded_amount DECIMAL(8,2),
     payment_type TEXT NOT NULL,
-    status TEXT NOT NULL
+    status TEXT NOT NULL,
+    CONSTRAINT unique_transaction_id UNIQUE (transaction_id)
 );
 
 -- Create sessions table

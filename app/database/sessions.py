@@ -14,7 +14,7 @@ def get_session(session_id: str, conn):
             session = cur.fetchone()
     
     except Exception as e:
-        raise RuntimeError("Database Error", e)
+        raise RuntimeError("Database Error")
 
     if session is None:
         return None

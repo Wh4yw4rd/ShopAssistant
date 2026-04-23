@@ -1,4 +1,5 @@
 from app.schemas.data_schemas import TransactionsDB
+from datetime import datetime, timedelta
 
 def get_latest_transaction(conn):
     latest_transaction = """
@@ -52,3 +53,18 @@ def add_transactions(transactions: list[TransactionsDB], conn):
         raise RuntimeError("Database Error", e)
     
          
+def transaction_date_range(start: datetime, end: datetime, conn):
+    date_range_filter = """
+                        SELECT *
+                        FROM transactions
+                        WHERE transaction_timestamp >= %s
+                        AND transaction_timestamp < %s
+                        ORDER BY transaction_timestamp ASC;
+                        """
+    
+    with conn.cursor() as cur:
+        cur.execute(date_range_filter, (start, end,))
+        transactions = cur.fetchall()
+    
+    return transactions
+    
