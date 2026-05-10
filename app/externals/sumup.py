@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 
 from app.core.config import sumup_api
 from app.schemas.data_schemas import TransactionsDB
+from app.models.errors import APIConnectionError
 
 
 def get_transactions(oldest_ref: str, limit: int = 1000, use_href: bool = False, href: str | None = None):
@@ -19,8 +20,9 @@ def get_transactions(oldest_ref: str, limit: int = 1000, use_href: bool = False,
     response = requests.get(url, headers=header)
 
     if response.status_code != 200:
-        raise Exception("Error Connecting to SumUp API", response.json())
+        raise APIConnectionError("Unable to connect to external transaction API.")
     
+
     transactions = response.json()["items"]
     transactions = [TransactionsDB(transaction_id = transaction["id"], 
                                    transaction_code = transaction["transaction_code"],
@@ -51,7 +53,7 @@ def get_first_transaction():
     response = requests.get(url, headers=header)
 
     if response.status_code != 200:
-        raise Exception("Error Connecting to SumUp API", response.json())
+        raise APIConnectionError("Unable to connect to external transaction API.")
     
     transactions = response.json()["items"]
     transactions = [TransactionsDB(transaction_id = transaction["id"], 

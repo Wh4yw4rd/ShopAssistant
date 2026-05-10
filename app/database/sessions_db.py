@@ -1,5 +1,7 @@
 from app.schemas.session_schemas import *
 from app.models.session_models import *
+from app.models.errors import DatabaseQueryError, InvalidSession
+
 
 def get_session(session_id: str, conn):
     get_session = """
@@ -13,11 +15,11 @@ def get_session(session_id: str, conn):
             cur.execute(get_session, (session_id,))
             session = cur.fetchone()
     
-    except Exception as e:
-        raise RuntimeError("Database Error")
+    except Exception:
+        raise DatabaseQueryError("Invalid session database query.")
 
     if session is None:
-        return None
+        raise InvalidSession()
     
     session = SessionDB(
         id=session[0],
@@ -42,15 +44,15 @@ def add_session(new_session: Session, conn):
 
         conn.commit()
 
-    except Exception as e:
+    except Exception:
         conn.rollback()
-        raise RuntimeError("Database Error - Unable to create session", e)
+        raise DatabaseQueryError("Unable to import session into database.")
     
 
 def remove_session(old_id: int, conn):
     delete_session = """
             DELETE FROM sessions
-            WHERE session_id = %s;
+            WHERE session_id = %s; 
     """
 
     try:
@@ -59,6 +61,6 @@ def remove_session(old_id: int, conn):
 
         conn.commit()
         
-    except Exception as e:
+    except Exception:
         conn.rollback()
-        raise RuntimeError("Database Error - Unable to delete session")
+        raise DatabaseQueryError("Unable to remove session from database.")

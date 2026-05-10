@@ -1,20 +1,22 @@
-from app.database.user import *
+from app.database.user_db import *
 from app.models.user_models import *
 from app.core.security import *
+from app.models.errors import AdminRequired
+
 
 def create_user(new_user: NewUser, conn):
     password_hash = hash(new_user.password)
-    new_user_db = UserDB(new_user.name, password_hash, new_user.email, new_user.admin)
-
+    new_user_db = UserDB(name = new_user.name,
+                         password_hash = password_hash, 
+                         email = new_user.email, 
+                         admin = new_user.admin)
     add_user(new_user_db, conn)
 
 
-def delete_user(name: str, password: str, conn):
+def delete_user(name: str, admin: bool, remove_name: str, conn):
+    if not admin and name != remove_name:
+        raise AdminRequired("Admin account required to remove users.")
 
-    user_entry = get_user_credentials(name, conn)
+    user_entry = get_user_credentials(remove_name, conn)
 
-    if not password_verify(password, user_entry.password_hash):
-        raise ValueError("Incorrect Password")
-    
-    else:
-        remove_user(name)
+    remove_user(remove_name)

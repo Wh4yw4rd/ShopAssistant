@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
-from app.database.connections import get_conn
+from app.database.connections_db import get_conn
 from app.externals.sumup import *
-from app.database.transactions import *
+from app.database.transactions_db import *
 from app.functions.transactions import *
 
 router = APIRouter()

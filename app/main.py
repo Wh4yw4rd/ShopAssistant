@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from contextlib import asynccontextmanager
 
 from app.api.router import api_router
-from app.database.connections import *
+from app.database.connections_db import *
 
 
 @asynccontextmanager

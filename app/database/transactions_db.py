@@ -1,6 +1,8 @@
 from app.schemas.data_schemas import TransactionsDB
 from datetime import datetime, timedelta
 
+from app.models.errors import DatabaseQueryError, EmptyTransactionTable
+
 def get_latest_transaction(conn):
     latest_transaction = """
                         SELECT 
@@ -16,10 +18,13 @@ def get_latest_transaction(conn):
             cur.execute(latest_transaction)
             latest = cur.fetchone()
         
+        if latest is None:
+            raise EmptyTransactionTable()
+        
         return latest
     
-    except Exception as e:
-        raise RuntimeError("Database Error")
+    except Exception:
+        raise DatabaseQueryError("Unable to retrieve transaction data.")
     
 
 def add_transactions(transactions: list[TransactionsDB], conn):
@@ -48,9 +53,9 @@ def add_transactions(transactions: list[TransactionsDB], conn):
         
         conn.commit()
     
-    except Exception as e:
+    except Exception:
         conn.rollback()
-        raise RuntimeError("Database Error", e)
+        raise DatabaseQueryError("Unable to add transactions to database.")
     
          
 def transaction_date_range(start: datetime, end: datetime, conn):
@@ -61,10 +66,16 @@ def transaction_date_range(start: datetime, end: datetime, conn):
                         AND transaction_timestamp < %s
                         ORDER BY transaction_timestamp ASC;
                         """
+    try:
+        with conn.cursor() as cur:
+            cur.execute(date_range_filter, (start, end,))
+            transactions = cur.fetchall()
+        
+        return transactions
     
-    with conn.cursor() as cur:
-        cur.execute(date_range_filter, (start, end,))
-        transactions = cur.fetchall()
+    except Exception:
+        raise DatabaseQueryError("Unable to retrieve transaction data.")
     
-    return transactions
+
+
     

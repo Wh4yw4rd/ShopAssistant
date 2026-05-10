@@ -1,4 +1,7 @@
+from psycopg2.errors import UniqueViolation
+
 from app.schemas.user_schemas import *
+from app.models.errors import DatabaseQueryError, InvalidUser, NameAlreadyExists
 
 
 def get_user_credentials(name: str, conn):
@@ -15,21 +18,24 @@ def get_user_credentials(name: str, conn):
         with conn.cursor() as cur:
             cur.execute(get_user, (name,))
             user_data = cur.fetchone()
-    
-    except Exception as e:
-        raise RuntimeError("Database Error")
-    
-    if user_data is None:
-        raise ValueError("User Not Found")
-    
-    user_entry = UserDB(
-        name = user_data[0],
-        password_hash = user_data[1],
-        email = user_data[2],
-        admin = user_data[3]
-    )
 
-    return user_entry
+        if user_data is None:
+            raise InvalidUser()
+    
+        user_entry = UserDB(
+            name = user_data[0],
+            password_hash = user_data[1],
+            email = user_data[2],
+            admin = user_data[3]
+        )
+
+        return user_entry
+
+    except Exception:
+        conn.rollback()
+        raise DatabaseQueryError("Unable to get user data.")
+    
+    
 
 
 def add_user(new_user: UserDB, conn):
@@ -43,9 +49,13 @@ def add_user(new_user: UserDB, conn):
 
         conn.commit()
 
-    except Exception as e:
+    except UniqueViolation:
         conn.rollback()
-        raise RuntimeError("Database Error")
+        raise NameAlreadyExists
+
+    except Exception:
+        conn.rollback()
+        raise DatabaseQueryError("Unable to create new user.")
 
 
 def remove_user(name: str, conn):
@@ -60,6 +70,6 @@ def remove_user(name: str, conn):
 
         conn.commit()
 
-    except Exception as e:
+    except Exception:
         conn.rollback()
-        raise RuntimeError("Database Error")
+        raise DatabaseQueryError("Unable to delete User.")

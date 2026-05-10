@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 
-from app.database.transactions import *
+from app.database.transactions_db import *
 
 
 def moving_7_day_average(day: datetime, conn):

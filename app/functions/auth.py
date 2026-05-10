@@ -1,8 +1,9 @@
 from app.models.user_models import *
 from app.schemas.user_schemas import *
 from app.core.security import *
-from app.database.user import *
-from app.database.sessions import *
+from app.database.user_db import *
+from app.database.sessions_db import *
+from app.models.errors import InvalidUser
 
 import uuid
 
@@ -17,7 +18,7 @@ def authenticate_user(user_login: UserLogin, conn):
     user_db = get_user_credentials(user_login.name, conn)
 
     if not password_verify(user_login.password, user_db.password_hash):
-        raise ValueError("Invalid Credentials")
+        raise InvalidUser()
     
     else:
         id = str(uuid.uuid4())

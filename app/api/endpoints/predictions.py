@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 from datetime import datetime
-from app.database.connections import get_conn
+from app.database.connections_db import get_conn
 from app.functions.predictions import *
 
 
