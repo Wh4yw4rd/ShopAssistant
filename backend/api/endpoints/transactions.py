@@ -15,8 +15,8 @@ def refresh_transactions(conn = Depends(get_conn)):
 @router.get("/range/{start}-{end}")
 def transaction_from_range(start: str, end: str, conn = Depends(get_conn)):
     try:
-        start = datetime.strptime(start, "%d%m%Y")
-        end = datetime.strptime(end, "%d%m%Y")
+        start = datetime.strptime(start, r"%Y%m%d")
+        end = datetime.strptime(end, r"%Y%m%d")
     except Exception:
         raise HTTPException(status_code=400, detail="Invalid Date Formats")
     

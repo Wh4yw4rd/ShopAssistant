@@ -72,5 +72,3 @@ def delete_user(old_user: UserLogin, conn = Depends(get_conn), session_id: str |
         delete_user(old_user.name, conn)
         return {"message": f"{old_user.name} deleted!"}
     
-
-
